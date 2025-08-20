@@ -13,5 +13,19 @@ export default async function handler(req, res) {
     snippet: r.snippet
   })) : [];
 
-  res.status(200).json({ results });
+  // petite suggestion auto si ça ressemble à du Roblox
+  let code = "";
+  if (question.includes("tuer") || question.includes("kill")) {
+    code = `-- Script simple pour tuer un joueur quand il marche sur une part
+local part = workspace.Part
+part.Touched:Connect(function(hit)
+    local character = hit.Parent
+    local humanoid = character:FindFirstChild("Humanoid")
+    if humanoid then
+        humanoid.Health = 0
+    end
+end)`;
+  }
+
+  res.status(200).json({ results, code });
 }
