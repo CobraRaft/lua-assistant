@@ -2,7 +2,7 @@ export default async function handler(req, res) {
   const { question } = req.body;
 
   // 🔎 On filtre les recherches pour du contenu Roblox uniquement
-  const q = `${question} site:devforum.roblox.com OR site:scriptinghelpers.org OR site:stackoverflow.com`;
+  const q = `${question} site:devforum.roblox.com`;
 
   // 🌍 Appel API Google
   const response = await fetch(
