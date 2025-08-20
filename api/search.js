@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   const { question } = req.body;
 
-  const q = `${question} site:devforum.roblox.com OR site:scriptinghelpers.org OR site:stackoverflow.com`;
+  const q = `${question} site:devforum.roblox.com`;
 
   const response = await fetch(
     `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(q)}&key=${process.env.GOOGLE_KEY}&cx=${process.env.SEARCH_ENGINE_ID}`
