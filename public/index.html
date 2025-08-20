@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Assistant Lua Roblox</title>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; background:#1e1e1e; color:white; text-align:center; }
+    .box { background:#2d2d2d; padding:10px; border-radius:8px; margin:10px auto; width:80%; text-align:left; }
+    pre { background:#111; padding:10px; border-radius:6px; color:#0f0; }
+    button { margin:5px; padding:6px 12px; border:none; border-radius:6px; cursor:pointer; }
+    input, textarea { margin:5px; border-radius:6px; padding:8px; }
+  </style>
+</head>
+<body>
+  <h1>🤖 Assistant Roblox Lua</h1>
+  <input id="question" placeholder="Pose ta question..." style="width:60%;">
+  <button onclick="ask()">Envoyer</button>
+  <div id="response"></div>
+
+  <h2>📚 Enseigner à l’IA</h2>
+  <input id="learnQ" placeholder="Question..." style="width:60%;"><br>
+  <textarea id="learnA" placeholder="Réponse ou code..." style="width:60%;height:100px;"></textarea><br>
+  <button onclick="learn()">Enseigner</button>
+
+<script>
+function ask(){
+  fetch("/api/ask", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({question:document.getElementById("question").value})
+  }).then(r=>r.json()).then(data=>{
+    if(data.answer.includes("Je ne sais pas")) {
+      search();
+    } else {
+      showAnswer(data.answer);
+    }
+  });
+}
+
+function search(){
+  fetch("/api/search", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({question:document.getElementById("question").value})
+  }).then(r=>r.json()).then(sites=>{
+    let html = "<h3>🔎 Résultats trouvés :</h3>";
+    sites.results.forEach(s=>{
+      html += `<div class="box"><a href="${s.url}" target="_blank"><b>${s.title}</b></a><p>${s.snippet}</p></div>`;
+    });
+    document.getElementById("response").innerHTML = html;
+  });
+}
+
+function learn(){
+  fetch("/api/learn", {
+    method:"POST", headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      question:document.getElementById("learnQ").value,
+      answer:document.getElementById("learnA").value
+    })
+  }).then(()=>alert("Appris avec succès ✅"));
+}
+
+function showAnswer(answer){
+  document.getElementById("response").innerHTML =
+    `<div class="box">${marked.parse(answer)}
+      <button onclick="copyText(\`${answer}\`)">Copier</button>
+      <button onclick="downloadText(\`${answer}\`)">Télécharger</button>
+    </div>`;
+}
+
+function copyText(text){
+  navigator.clipboard.writeText(text);
+  alert("Copié !");
+}
+
+function downloadText(text){
+  const blob = new Blob([text], {type:"text/plain"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "code.lua"; a.click();
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
