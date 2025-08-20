@@ -6,63 +6,79 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     body {
-      background: #0d0d0d;
-      color: #f5f5f5;
+      margin: 0;
       font-family: 'Segoe UI', sans-serif;
-      margin: 0; padding: 0;
-      display: flex; flex-direction: column; height: 100vh;
+      background: linear-gradient(135deg, #0d0d2b, #1a1a40, #2a004f);
+      color: #f5f5f5;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+    }
+    h1 {
+      text-align: center;
+      padding: 20px;
+      font-size: 28px;
+      background: linear-gradient(90deg, #00eaff, #7a00ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
     }
     .chat-container {
       flex: 1;
-      padding: 20px;
       overflow-y: auto;
+      padding: 20px;
       display: flex;
       flex-direction: column;
     }
     .message {
-      max-width: 70%;
-      padding: 12px 16px;
+      max-width: 75%;
+      padding: 14px 18px;
       margin: 8px 0;
-      border-radius: 12px;
+      border-radius: 16px;
+      font-size: 15px;
       line-height: 1.4em;
       word-wrap: break-word;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      animation: fadeIn 0.2s ease-in-out;
     }
     .user {
-      background: #0055ff;
+      background: linear-gradient(135deg, #007bff, #00c6ff);
       align-self: flex-end;
-      border-bottom-right-radius: 4px;
+      border-bottom-right-radius: 6px;
     }
     .bot {
-      background: #1e1e1e;
+      background: linear-gradient(135deg, #2d2d2d, #1e1e1e);
       align-self: flex-start;
-      border-bottom-left-radius: 4px;
+      border-bottom-left-radius: 6px;
     }
     .input-box {
       display: flex;
       padding: 12px;
-      background: #1e1e1e;
+      background: #111;
       border-top: 1px solid #333;
     }
     input {
       flex: 1;
-      background: transparent;
+      background: #1e1e1e;
       border: none;
       color: white;
       font-size: 16px;
-      padding: 8px;
+      padding: 12px;
+      border-radius: 10px;
+      margin-right: 8px;
     }
-    input:focus { outline: none; }
+    input:focus { outline: none; box-shadow: 0 0 8px #00c6ff; }
     button {
-      background: #ff007f;
+      background: linear-gradient(135deg, #ff007f, #ff3399);
       border: none;
       color: white;
       font-weight: bold;
-      padding: 10px 16px;
-      border-radius: 8px;
-      margin-left: 8px;
+      padding: 12px 18px;
+      border-radius: 10px;
       cursor: pointer;
+      transition: 0.2s;
+      box-shadow: 0 0 10px rgba(255,0,127,0.5);
     }
+    button:hover { transform: scale(1.05); }
     pre {
       background: #111;
       padding: 12px;
@@ -71,10 +87,14 @@
       margin-top: 10px;
       color: #00ff88;
     }
-    a { color: #4fc3f7; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
+  <h1>🤖 Assistant Roblox Lua</h1>
   <div class="chat-container" id="chat"></div>
 
   <div class="input-box">
@@ -120,6 +140,9 @@ function search(q){
     sites.results.forEach(s=>{
       text += `\n- [${s.title}](${s.url})\n> ${s.snippet}`;
     });
+    if(sites.code){
+      text += `\n\n💻 **Exemple de code :**\n\`\`\`lua\n${sites.code}\n\`\`\``;
+    }
     addMessage(text, "bot");
   });
 }
