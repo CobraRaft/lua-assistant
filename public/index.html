@@ -2,110 +2,126 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>🤖 Assistant Roblox Lua</title>
+  <title>Assistant Roblox Lua</title>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
-    body { 
-      font-family: 'Segoe UI', sans-serif; 
-      background: #0d0d0d; 
-      color: #f5f5f5; 
-      margin: 0; padding: 0; 
-      display: flex; flex-direction: column; align-items: center;
+    body {
+      background: #0d0d0d;
+      color: #f5f5f5;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0; padding: 0;
+      display: flex; flex-direction: column; height: 100vh;
     }
-    h1 { margin: 20px; font-size: 28px; }
-    .container { width: 80%; max-width: 800px; }
-    .input-box { 
-      display: flex; 
-      background: #1e1e1e; 
-      border-radius: 12px; 
-      padding: 8px; 
-      margin-bottom: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.6);
+    .chat-container {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
     }
-    input { 
-      flex: 1; 
-      border: none; 
-      background: transparent; 
-      color: white; 
-      padding: 10px; 
+    .message {
+      max-width: 70%;
+      padding: 12px 16px;
+      margin: 8px 0;
+      border-radius: 12px;
+      line-height: 1.4em;
+      word-wrap: break-word;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    }
+    .user {
+      background: #0055ff;
+      align-self: flex-end;
+      border-bottom-right-radius: 4px;
+    }
+    .bot {
+      background: #1e1e1e;
+      align-self: flex-start;
+      border-bottom-left-radius: 4px;
+    }
+    .input-box {
+      display: flex;
+      padding: 12px;
+      background: #1e1e1e;
+      border-top: 1px solid #333;
+    }
+    input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: white;
       font-size: 16px;
+      padding: 8px;
     }
     input:focus { outline: none; }
-    button { 
-      background: #ff007f; 
-      border: none; 
-      color: white; 
-      padding: 10px 16px; 
-      border-radius: 8px; 
-      font-weight: bold; 
-      cursor: pointer; 
-      transition: 0.2s;
+    button {
+      background: #ff007f;
+      border: none;
+      color: white;
+      font-weight: bold;
+      padding: 10px 16px;
+      border-radius: 8px;
+      margin-left: 8px;
+      cursor: pointer;
     }
-    button:hover { background: #ff3399; }
-    .box { 
-      background: #1e1e1e; 
-      border-radius: 12px; 
-      padding: 15px; 
-      margin: 10px 0; 
-      box-shadow: 0 0 5px rgba(255,255,255,0.1);
-    }
-    pre { 
-      background: #111; 
-      padding: 12px; 
-      border-radius: 8px; 
-      overflow-x: auto; 
+    pre {
+      background: #111;
+      padding: 12px;
+      border-radius: 8px;
+      overflow-x: auto;
+      margin-top: 10px;
       color: #00ff88;
     }
-    a { color: #4fc3f7; text-decoration: none; }
-    a:hover { text-decoration: underline; }
+    a { color: #4fc3f7; }
   </style>
 </head>
 <body>
-  <h1>🤖 Assistant Roblox Lua</h1>
-  <div class="container">
-    <div class="input-box">
-      <input id="question" placeholder="Pose ta question..." onkeypress="if(event.key==='Enter'){ask()}">
-      <button onclick="ask()">Envoyer</button>
-    </div>
-    <div id="response"></div>
+  <div class="chat-container" id="chat"></div>
+
+  <div class="input-box">
+    <input id="question" placeholder="Écris ta question..." onkeypress="if(event.key==='Enter'){ask()}">
+    <button onclick="ask()">Envoyer</button>
   </div>
 
 <script>
+function addMessage(text, type="bot") {
+  const chat = document.getElementById("chat");
+  const div = document.createElement("div");
+  div.className = `message ${type}`;
+  div.innerHTML = marked.parse(text);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
 function ask(){
+  const q = document.getElementById("question").value;
+  if(!q) return;
+
+  addMessage(q, "user");
+  document.getElementById("question").value = "";
+
   fetch("/api/ask", {
     method:"POST", headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({question:document.getElementById("question").value})
+    body:JSON.stringify({question:q})
   }).then(r=>r.json()).then(data=>{
     if(data.answer.includes("Je ne sais pas")) {
-      search();
+      search(q);
     } else {
-      showAnswer(data.answer);
+      addMessage(data.answer, "bot");
     }
   });
 }
 
-function search(){
+function search(q){
   fetch("/api/search", {
     method:"POST", headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({question:document.getElementById("question").value})
+    body:JSON.stringify({question:q})
   }).then(r=>r.json()).then(sites=>{
-    let html = "<h2>🔎 Résultats trouvés :</h2>";
+    let text = "🔎 **Résultats Roblox trouvés :**\n";
     sites.results.forEach(s=>{
-      html += `<div class="box">
-        <a href="${s.url}" target="_blank"><b>${s.title}</b></a>
-        <p>${s.snippet}</p>
-      </div>`;
+      text += `\n- [${s.title}](${s.url})\n> ${s.snippet}`;
     });
-    if(sites.code){
-      html += `<div class="box"><h3>💻 Exemple de code :</h3><pre>${sites.code}</pre></div>`;
-    }
-    document.getElementById("response").innerHTML = html;
+    addMessage(text, "bot");
   });
-}
-
-function showAnswer(answer){
-  document.getElementById("response").innerHTML =
-    `<div class="box">${marked.parse(answer)}</div>`;
 }
 </script>
 </body>
