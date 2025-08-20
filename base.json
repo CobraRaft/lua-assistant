@@ -1,0 +1,5 @@
+{
+  "leaderstats": "game.Players.PlayerAdded:Connect(function(player)\n    local stats = Instance.new('Folder')\n    stats.Name = 'leaderstats'\n    stats.Parent = player\n\n    local Money = Instance.new('IntValue')\n    Money.Name = 'Money'\n    Money.Value = 0\n    Money.Parent = stats\nend)",
+
+  "tween": "local TweenService = game:GetService('TweenService')\nlocal part = workspace.Part\nlocal tweenInfo = TweenInfo.new(2, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)\nlocal goal = {Position = Vector3.new(0,10,0)}\nlocal tween = TweenService:Create(part, tweenInfo, goal)\ntween:Play()"
+}
